@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบการประเมินครูผู้ช่วย ว19 | สพม.เพชรบูรณ์</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Noto+Serif+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2563a8;
+  --primary-pale: #dbeafe;
+  --accent: #c8963e;
+  --accent-light: #f3d78a;
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+  --warning: #d97706;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --sidebar-w: 260px;
+  --header-h: 64px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;}
+/* ─── LOGIN ─── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a3a5c 0%,#2563a8 50%,#1e5aa8 100%);position:fixed;inset:0;z-index:9999;}
+#login-screen::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.login-card{background:white;border-radius:20px;padding:48px 40px;width:420px;box-shadow:0 24px 80px rgba(0,0,0,.3);position:relative;animation:loginSlide .5s ease;}
+@keyframes loginSlide{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo .logo-icon{width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;box-shadow:0 8px 24px rgba(26,58,92,.3);}
+.login-logo h1{font-size:20px;font-weight:700;color:var(--primary);font-family:'Noto Serif Thai',serif;}
+.login-logo p{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.form-group{margin-bottom:20px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.form-group input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:15px;font-family:'Sarabun',sans-serif;transition:all .2s;background:var(--surface2);}
+.form-group input:focus{outline:none;border-color:var(--primary-light);background:white;box-shadow:0 0 0 4px rgba(37,99,168,.1);}
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .2s;margin-top:8px;}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,58,92,.3);}
+.login-err{background:#fee2e2;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+/* ─── APP SHELL ─── */
+#app{display:none;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--primary);color:white;display:flex;flex-direction:column;z-index:100;transition:transform .3s;}
+.sidebar-header{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar-logo{display:flex;align-items:center;gap:12px;}
+.sidebar-logo .s-icon{width:44px;height:44px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.sidebar-logo .s-title{font-size:13px;font-weight:700;line-height:1.4;}
+.sidebar-logo .s-sub{font-size:11px;opacity:.7;margin-top:2px;}
+.sidebar-user{padding:14px 16px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);margin:12px;border-radius:10px;}
+.user-avatar{width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.user-info .u-name{font-size:13px;font-weight:600;}
+.user-info .u-role{font-size:11px;opacity:.6;}
+nav{flex:1;padding:8px 12px;overflow-y:auto;}
+.nav-section{font-size:10px;font-weight:700;letter-spacing:1px;opacity:.5;padding:16px 8px 6px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;margin-bottom:2px;color:rgba(255,255,255,.8);}
+.nav-item:hover{background:rgba(255,255,255,.1);color:white;}
+.nav-item.active{background:var(--accent);color:white;font-weight:600;}
+.nav-item .nav-icon{width:20px;text-align:center;font-size:16px;}
+.nav-badge{margin-left:auto;background:var(--accent);font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700;}
+.sidebar-footer{padding:12px;border-top:1px solid rgba(255,255,255,.1);}
+.btn-logout{width:100%;padding:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.2);border-radius:10px;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-logout:hover{background:rgba(220,38,38,.3);border-color:rgba(220,38,38,.5);}
+/* ─── MAIN CONTENT ─── */
+.main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column;}
+.topbar{height:var(--header-h);background:white;border-bottom:1px solid var(--border-light);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.topbar-title{font-size:19px;font-weight:700;color:var(--primary);flex:1;font-family:'Noto Serif Thai',serif;}
+.topbar-actions{display:flex;gap:10px;}
+.content{padding:28px;flex:1;}
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--primary);color:white;}
+.btn-primary:hover{background:var(--primary-light);}
+.btn-accent{background:var(--accent);color:white;}
+.btn-accent:hover{filter:brightness(1.1);}
+.btn-success{background:var(--success);color:white;}
+.btn-success:hover{filter:brightness(1.1);}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{filter:brightness(1.1);}
+.btn-outline{background:white;color:var(--primary);border:2px solid var(--primary);}
+.btn-outline:hover{background:var(--primary-pale);}
+.btn-sm{padding:6px 14px;font-size:13px;}
+.btn-xs{padding:4px 10px;font-size:12px;}
+/* ─── CARDS ─── */
+.card{background:white;border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+.card-header{padding:18px 24px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:12px;}
+.card-header h3{font-size:16px;font-weight:700;color:var(--primary);}
+.card-body{padding:24px;}
+/* ─── STATS CARDS ─── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:14px;padding:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.stat-icon.blue{background:var(--primary-pale);color:var(--primary-light);}
+.stat-icon.green{background:var(--success-light);color:var(--success);}
+.stat-icon.red{background:var(--danger-light);color:var(--danger);}
+.stat-icon.yellow{background:#fef3c7;color:var(--warning);}
+.stat-info .stat-num{font-size:28px;font-weight:800;line-height:1;color:var(--primary);}
+.stat-info .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
+/* ─── TABLES ─── */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--primary);color:white;padding:11px 14px;text-align:left;font-size:13px;font-weight:600;white-space:nowrap;}
+th:first-child{border-radius:0;}
+td{padding:11px 14px;font-size:14px;border-bottom:1px solid var(--border-light);}
+tr:hover td{background:var(--surface2);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-success{background:var(--success-light);color:var(--success);}
+.badge-danger{background:var(--danger-light);color:var(--danger);}
+.badge-warning{background:#fef3c7;color:var(--warning);}
+.badge-info{background:var(--primary-pale);color:var(--primary-light);}
+/* ─── FORM STYLES ─── */
+.form-row{display:grid;gap:16px;margin-bottom:16px;}
+.form-row.cols-2{grid-template-columns:1fr 1fr;}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-row.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Sarabun',sans-serif;transition:all .2s;background:white;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(37,99,168,.1);}
+.field textarea{min-height:80px;resize:vertical;}
+/* ─── EVALUATION FORM ─── */
+.eval-section{background:white;border-radius:14px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;}
+.eval-section-header{padding:16px 22px;background:var(--primary);color:white;display:flex;align-items:center;gap:10px;}
+.eval-section-header h3{font-size:15px;font-weight:700;}
+.eval-sub-header{padding:12px 22px;background:linear-gradient(90deg,var(--primary-pale),var(--bg));border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px;}
+.eval-sub-header h4{font-size:14px;font-weight:700;color:var(--primary);}
+.eval-item{display:grid;grid-template-columns:1fr auto auto;align-items:start;gap:16px;padding:14px 22px;border-bottom:1px solid var(--border-light);transition:background .2s;}
+.eval-item:hover{background:var(--surface2);}
+.eval-item:last-child{border-bottom:none;}
+.eval-item-text{font-size:14px;line-height:1.6;}
+.eval-item-num{font-size:12px;font-weight:700;color:var(--primary-light);background:var(--primary-pale);padding:2px 8px;border-radius:12px;flex-shrink:0;}
+.eval-checks{display:flex;flex-direction:column;gap:8px;align-items:center;min-width:80px;}
+.eval-checks label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap;}
+.eval-checks input[type=checkbox]{width:17px;height:17px;accent-color:var(--primary);cursor:pointer;}
+.eval-method{display:flex;flex-direction:column;gap:8px;align-items:center;min-width:80px;}
+.eval-method label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap;}
+.eval-method input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+.eval-col-headers{display:grid;grid-template-columns:1fr auto auto;gap:16px;padding:10px 22px 6px;background:var(--surface2);}
+.eval-col-headers span{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.eval-col-headers span:nth-child(2),.eval-col-headers span:nth-child(3){min-width:80px;text-align:center;}
+/* ─── SUMMARY BOX ─── */
+.summary-box{padding:18px 22px;background:linear-gradient(90deg,var(--surface2),white);border-top:2px solid var(--primary-pale);}
+.summary-inner{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.summary-count{font-size:15px;font-weight:700;}
+.summary-count span{color:var(--primary-light);font-size:24px;}
+.summary-result{font-size:16px;font-weight:700;padding:6px 20px;border-radius:20px;}
+.summary-result.pass{background:var(--success-light);color:var(--success);}
+.summary-result.fail{background:var(--danger-light);color:var(--danger);}
+/* ─── PHOTO UPLOAD ─── */
+.photo-upload{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);}
+.photo-upload:hover{border-color:var(--primary-light);background:var(--primary-pale);}
+.photo-upload.has-photo{border-style:solid;border-color:var(--success);}
+.photo-preview{max-width:100%;max-height:200px;border-radius:8px;margin-top:12px;}
+/* ─── TABS ─── */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border-light);margin-bottom:24px;}
+.tab{padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+/* ─── CHARTS ─── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.chart-card{background:white;border-radius:14px;padding:20px;box-shadow:var(--shadow);}
+.chart-card h4{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px;}
+.chart-container{position:relative;height:240px;}
+/* ─── MODAL ─── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:16px;padding:32px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .3s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal h2{font-size:20px;font-weight:700;color:var(--primary);margin-bottom:24px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border-light);}
+/* ─── ALERTS ─── */
+.alert{padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.alert-success{background:var(--success-light);color:var(--success);border-left:4px solid var(--success);}
+.alert-danger{background:var(--danger-light);color:var(--danger);border-left:4px solid var(--danger);}
+.alert-info{background:var(--primary-pale);color:var(--primary-light);border-left:4px solid var(--primary-light);}
+/* ─── AUTOSAVE INDICATOR ─── */
+.autosave-indicator{position:fixed;bottom:20px;right:20px;background:var(--success);color:white;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;display:none;z-index:999;box-shadow:var(--shadow);}
+.autosave-indicator.show{display:flex;align-items:center;gap:6px;animation:fadeInUp .3s ease;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+/* ─── PAGE TRANSITIONS ─── */
+.page{display:none;animation:fadeIn .3s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+/* ─── MISC ─── */
+.divider{height:1px;background:var(--border-light);margin:20px 0;}
+.text-center{text-align:center;}
+.flex{display:flex;}
+.flex-between{display:flex;justify-content:space-between;align-items:center;}
+.gap-2{gap:8px;}
+.mt-2{margin-top:8px;}
+.mb-3{margin-bottom:16px;}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;background:var(--primary-pale);color:var(--primary);}
+.section-divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border-light);}
+.section-divider span{font-size:12px;color:var(--text-muted);font-weight:600;white-space:nowrap;}
+.empty-state{text-align:center;padding:48px;color:var(--text-muted);}
+.empty-state .empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-state p{font-size:15px;}
+.tooltip-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--accent-light);color:#92400e;font-weight:600;}
+select option{font-family:'Sarabun',sans-serif;}
+.criteria-note{font-size:12px;color:var(--text-muted);font-style:italic;padding:8px 22px;background:var(--surface2);border-top:1px solid var(--border-light);}
+.record-card{background:white;border-radius:12px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;transition:all .2s;}
+.record-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px);}
+.record-card-header{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border-light);}
+.record-card-body{padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.record-field .rf-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;}
+.record-field .rf-value{font-size:14px;font-weight:600;color:var(--text);}
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:white;padding:14px 18px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;}
+.filter-bar .field{margin:0;min-width:150px;}
+.filter-bar label{margin-bottom:4px;}
+.progress-bar{height:8px;background:var(--border-light);border-radius:4px;overflow:hidden;margin-top:4px;}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width .5s ease;background:var(--success);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🎓</div>
+      <h1>ระบบการประเมินครูผู้ช่วย ว19</h1>
+      <p>กลุ่มนิเทศ ติดตาม และประเมินผลการจัดการศึกษา<br>สพม.เพชรบูรณ์</p>
+    </div>
+    <div class="login-err" id="login-err">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+    <div class="form-group">
+      <label>ชื่อผู้ใช้</label>
+      <input type="text" id="inp-username" placeholder="กรอกชื่อผู้ใช้" onkeypress="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="form-group">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="inp-password" placeholder="กรอกรหัสผ่าน" onkeypress="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">🔐 เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="s-icon">🎓</div>
+        <div>
+          <div class="s-title">ระบบประเมิน ว19</div>
+          <div class="s-sub">สพม.เพชรบูรณ์</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-user" id="sidebar-user">
+      <div class="user-avatar" id="user-avatar-text">ธ</div>
+      <div class="user-info">
+        <div class="u-name" id="sidebar-username">-</div>
+        <div class="u-role">ศึกษานิเทศก์</div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-section">เมนูหลัก</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="nav-icon">📊</span> แดชบอร์ดภาพรวม
+      </div>
+      <div class="nav-item" onclick="showPage('new-eval')">
+        <span class="nav-icon">📝</span> บันทึกการประเมินใหม่
+      </div>
+      <div class="nav-item" onclick="showPage('records')">
+        <span class="nav-icon">📋</span> บันทึกการประเมินทั้งหมด
+      </div>
+      <div class="nav-section">รายงาน</div>
+      <div class="nav-item" onclick="showPage('report-individual')">
+        <span class="nav-icon">👤</span> รายงานรายบุคคล
+      </div>
+      <div class="nav-item" onclick="showPage('report-school')">
+        <span class="nav-icon">🏫</span> รายงานรายโรงเรียน
+      </div>
+      <div class="nav-item" onclick="showPage('report-overview')">
+        <span class="nav-icon">🗂️</span> ภาพรวม สพม.เพชรบูรณ์
+      </div>
+      <div class="nav-section">ตั้งค่าระบบ</div>
+      <div class="nav-item" onclick="showPage('data-management')">
+        <span class="nav-icon">🗄️</span> จัดการข้อมูลพื้นฐาน
+      </div>
+      <div class="nav-item" onclick="showPage('users')">
+        <span class="nav-icon">👥</span> จัดการผู้ใช้งาน
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">🚪 ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">แดชบอร์ดภาพรวม</div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h4>📊 ผลการประเมินภาพรวม (ผ่าน/ไม่ผ่าน)</h4>
+            <div class="chart-container"><canvas id="chart-donut"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>📈 ผลการประเมินแยกตามครั้ง</h4>
+            <div class="chart-container"><canvas id="chart-bar-round"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>🏫 ผลการประเมินแยกตามโรงเรียน (10 อันดับแรก)</h4>
+            <div class="chart-container"><canvas id="chart-bar-school"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h4>🗺️ ผลการประเมินแยกตามสหวิทยาเขต</h4>
+            <div class="chart-container"><canvas id="chart-bar-network"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>📋 บันทึกการประเมินล่าสุด</h3></div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrap">
+              <table id="table-recent"><thead><tr><th>#</th><th>วันที่</th><th>ครูผู้รับการประเมิน</th><th>โรงเรียน</th><th>ครั้งที่</th><th>ด้านวิชาชีพ</th><th>ด้านคุณลักษณะ</th><th>ผลสรุป</th><th>จัดการ</th></tr></thead><tbody id="tbody-recent"></tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ NEW EVALUATION ══ -->
+      <div class="page" id="page-new-eval">
+        <!-- Header Info -->
+        <div class="card mb-3" style="margin-bottom:20px;">
+          <div class="card-header" style="background:var(--primary);"><h3 style="color:white;">📋 ข้อมูลการเข้านิเทศ</h3></div>
+          <div class="card-body">
+            <div class="form-row cols-3">
+              <div class="field">
+                <label>วันที่ประเมิน <span style="color:red">*</span></label>
+                <input type="date" id="eval-date">
+              </div>
+              <div class="field">
+                <label>เวลา <span style="color:red">*</span></label>
+                <input type="time" id="eval-time">
+              </div>
+              <div class="field">
+                <label>ครั้งที่ประเมิน <span style="color:red">*</span></label>
+                <select id="eval-round">
+                  <option value="">-- เลือกครั้งที่ --</option>
+                  <option value="1">ครั้งที่ 1</option>
+                  <option value="2">ครั้งที่ 2</option>
+                  <option value="3">ครั้งที่ 3</option>
+                  <option value="4">ครั้งที่ 4</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row cols-3">
+              <div class="field">
+                <label>ครูผู้รับการประเมิน <span style="color:red">*</span></label>
+                <select id="eval-teacher">
+                  <option value="">-- เลือกครูผู้ช่วย --</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>โรงเรียน <span style="color:red">*</span></label>
+                <select id="eval-school" onchange="updateNetworkFromSchool()">
+                  <option value="">-- เลือกโรงเรียน --</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>สหวิทยาเขต</label>
+                <input type="text" id="eval-network" readonly placeholder="กรอกอัตโนมัติจากโรงเรียน">
+              </div>
+            </div>
+            <div class="form-row cols-3">
+              <div class="field">
+                <label>รายวิชาที่สอน</label>
+                <input type="text" id="eval-subject" placeholder="เช่น คณิตศาสตร์ ค21101">
+              </div>
+              <div class="field">
+                <label>ระดับชั้น</label>
+                <select id="eval-level">
+                  <option value="">-- เลือกระดับชั้น --</option>
+                  <option>มัธยมศึกษาปีที่ 1</option>
+                  <option>มัธยมศึกษาปีที่ 2</option>
+                  <option>มัธยมศึกษาปีที่ 3</option>
+                  <option>มัธยมศึกษาปีที่ 4</option>
+                  <option>มัธยมศึกษาปีที่ 5</option>
+                  <option>มัธยมศึกษาปีที่ 6</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>ศึกษานิเทศก์ผู้ประเมิน</label>
+                <input type="text" id="eval-inspector" value="นายธีรพงศ์ จุลสายพันธ์" readonly>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>ภาพการประเมิน</label>
+                <div class="photo-upload" id="photo-drop" onclick="document.getElementById('photo-input').click()" ondragover="event.preventDefault()" ondrop="handlePhotoDrop(event)">
+                  <div id="photo-placeholder"><div style="font-size:32px;margin-bottom:8px;">📷</div><div style="font-size:14px;color:var(--text-muted);">คลิกหรือลากไฟล์ภาพมาวางที่นี่</div><div style="font-size:12px;color:var(--text-light);margin-top:4px;">รองรับ JPG, PNG ขนาดไม่เกิน 5MB</div></div>
+                  <img id="photo-preview" class="photo-preview" style="display:none;">
+                </div>
+                <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoChange(this)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION A: วิชาชีพ ── -->
+        <div class="eval-section">
+          <div class="eval-section-header">
+            <span style="font-size:20px">📚</span>
+            <h3>ด้านที่ 1 ด้านวิชาชีพ</h3>
+          </div>
+
+          <!-- 1.1 -->
+          <div class="eval-sub-header">
+            <h4>๑.๑ การวิเคราะห์หลักสูตร การจัดทำรายวิชา และหน่วยการเรียนรู้ ตามมาตรฐานการเรียนรู้ และตัวชี้วัดหรือผลการเรียนรู้ ตามหลักสูตร</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-1"></div>
+
+          <!-- 1.2 -->
+          <div class="eval-sub-header">
+            <h4>๑.๒ การออกแบบการจัดการเรียนรู้ โดยเน้นผู้เรียนเป็นสำคัญ และส่งเสริมให้ผู้เรียนมีความรู้ ทักษะ คุณลักษณะ ประจำวิชา คุณลักษณะอันพึงประสงค์ และสมรรถนะที่สำคัญตามหลักสูตร</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-2"></div>
+
+          <!-- 1.3 -->
+          <div class="eval-sub-header">
+            <h4>๑.๓ การจัดกิจกรรมการเรียนรู้ การอำนวยความสะดวกในการเรียนรู้ และการส่งเสริมให้ผู้เรียนได้พัฒนาเต็มศักยภาพการเรียนรู้และทำงานร่วมกัน</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-3"></div>
+
+          <!-- 1.4 -->
+          <div class="eval-sub-header">
+            <h4>๑.๔ การเลือกและการใช้สื่อ เทคโนโลยี และแหล่งเรียนรู้ ที่สอดคล้องกับกิจกรรมการเรียนรู้ ให้ผู้เรียนมีทักษะการคิด</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-4"></div>
+
+          <!-- 1.5 -->
+          <div class="eval-sub-header">
+            <h4>๑.๕ การวัดและประเมินผลการเรียนรู้ ด้วยวิธีการที่หลากหลาย เหมาะสม และสอดคล้องกับมาตรฐานการเรียนรู้เพื่อให้ผู้เรียนพัฒนาการเรียนรู้อย่างต่อเนื่อง</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-5"></div>
+
+          <!-- 1.6 -->
+          <div class="eval-sub-header">
+            <h4>๑.๖ การจัดบรรยากาศที่ส่งเสริมและพัฒนาผู้เรียน ให้เกิดกระบวนการคิด ทักษะชีวิต ทักษะการทำงาน ทักษะการเรียนรู้ และนวัตกรรม ทักษะด้านสารสนเทศ สื่อ และเทคโนโลยี</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-6"></div>
+
+          <!-- 1.7 -->
+          <div class="eval-sub-header">
+            <h4>๑.๗ การส่งเสริมการเรียนรู้ โดยใช้เทคโนโลยีดิจิทัล</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-1-7"></div>
+
+          <!-- การส่งเสริมและสนับสนุน -->
+          <div class="eval-sub-header" style="background:linear-gradient(90deg,#e0f2fe,var(--bg));">
+            <h4 style="color:#0369a1">๒.๑ การจัดทำข้อมูลสารสนเทศของผู้เรียนและรายวิชา เพื่อใช้ในการส่งเสริมสนับสนุนการเรียนรู้และพัฒนาคุณภาพผู้เรียน</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-2-1"></div>
+
+          <div class="eval-sub-header" style="background:linear-gradient(90deg,#e0f2fe,var(--bg));">
+            <h4 style="color:#0369a1">๒.๒ การดำเนินการตามระบบดูแลช่วยเหลือผู้เรียน โดยใช้ข้อมูลสารสนเทศเกี่ยวกับผู้เรียนรายบุคคลและประสานความร่วมมือกับผู้มีส่วนเกี่ยวข้อง เพื่อพัฒนาและแก้ปัญหาผู้เรียน</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-2-2"></div>
+
+          <div class="eval-sub-header" style="background:linear-gradient(90deg,#e0f2fe,var(--bg));">
+            <h4 style="color:#0369a1">๒.๓ การเรียนรู้ด้านกฎหมาย ระเบียบที่เกี่ยวข้องกับการปฏิบัติงาน เช่น ความรู้ด้านงาน ๔ ฝ่าย (วิชาการ งบประมาณ บุคคล และบริหารงานทั่วไป) การจัดซื้อจัดจ้างการเงินและพัสดุ บัญชีการเงินในโรงเรียน การเขียนหนังสือราชการ ความรู้ด้านนโยบาย กฎหมายการศึกษา และที่เกี่ยวข้อง</h4>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-2-3"></div>
+
+          <div class="criteria-note">เกณฑ์การผ่าน: ต้องมีรายการที่ปรากฏ ไม่น้อยกว่า 9 รายการ จากทั้งหมด 15 รายการ</div>
+          <div class="summary-box">
+            <div class="summary-inner">
+              <div>
+                <div class="summary-count">รายการที่ปรากฏ: <span id="prof-count">0</span> / 15 รายการ</div>
+                <div class="progress-bar" style="width:200px;"><div class="progress-bar-fill" id="prof-bar" style="width:0%"></div></div>
+              </div>
+              <div id="prof-result" class="summary-result fail">❌ ไม่ผ่าน</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION B: คุณลักษณะ ── -->
+        <div class="eval-section">
+          <div class="eval-section-header" style="background:#065f46;">
+            <span style="font-size:20px">🌟</span>
+            <h3>ด้านที่ 2 ด้านคุณลักษณะส่วนบุคคล (วินัย คุณธรรม จริยธรรม และจรรยาบรรณวิชาชีพ)</h3>
+          </div>
+          <div class="eval-col-headers">
+            <span>รายการประเมิน</span>
+            <span>รายการที่ปรากฏ</span>
+            <span>วิธีการประเมิน / เอกสาร หลักฐาน</span>
+          </div>
+          <div id="items-char"></div>
+          <div class="criteria-note">เกณฑ์การผ่าน: ต้องมีรายการที่ปรากฏ ไม่น้อยกว่า 7 รายการ จากทั้งหมด 11 รายการ</div>
+          <div class="summary-box">
+            <div class="summary-inner">
+              <div>
+                <div class="summary-count">รายการที่ปรากฏ: <span id="char-count">0</span> / 11 รายการ</div>
+                <div class="progress-bar" style="width:200px;"><div class="progress-bar-fill" id="char-bar" style="width:0%;background:var(--success)"></div></div>
+              </div>
+              <div id="char-result" class="summary-result fail">❌ ไม่ผ่าน</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECTION C: ข้อเสนอแนะ ── -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header" style="background:#7c3aed;"><h3 style="color:white;">💡 ข้อสังเกต ข้อเสนอแนะ จุดเด่น และจุดที่ควรพัฒนา</h3></div>
+          <div class="card-body">
+            <div class="form-row cols-3">
+              <div class="field">
+                <label>📌 ข้อเสนอแนะ</label>
+                <textarea id="remark-suggest" placeholder="บันทึกข้อเสนอแนะ..."></textarea>
+              </div>
+              <div class="field">
+                <label>⭐ จุดเด่น</label>
+                <textarea id="remark-strength" placeholder="บันทึกจุดเด่น..."></textarea>
+              </div>
+              <div class="field">
+                <label>🔧 จุดที่ควรพัฒนา</label>
+                <textarea id="remark-improve" placeholder="บันทึกจุดที่ควรพัฒนา..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-bottom:40px;">
+          <button class="btn btn-outline" onclick="resetEvalForm()">🔄 ล้างฟอร์ม</button>
+          <button class="btn btn-primary" onclick="saveEvaluation()">💾 บันทึกการประเมิน</button>
+        </div>
+      </div>
+
+      <!-- ══ RECORDS ══ -->
+      <div class="page" id="page-records">
+        <div class="filter-bar">
+          <div class="field">
+            <label>ค้นหาชื่อครู</label>
+            <input type="text" id="filter-name" placeholder="ชื่อครูผู้ช่วย..." oninput="renderRecords()">
+          </div>
+          <div class="field">
+            <label>โรงเรียน</label>
+            <select id="filter-school" onchange="renderRecords()">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>สหวิทยาเขต</label>
+            <select id="filter-network" onchange="renderRecords()">
+              <option value="">ทั้งหมด</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ครั้งที่</label>
+            <select id="filter-round" onchange="renderRecords()">
+              <option value="">ทั้งหมด</option>
+              <option value="1">ครั้งที่ 1</option>
+              <option value="2">ครั้งที่ 2</option>
+              <option value="3">ครั้งที่ 3</option>
+              <option value="4">ครั้งที่ 4</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>ผลการประเมิน</label>
+            <select id="filter-result" onchange="renderRecords()">
+              <option value="">ทั้งหมด</option>
+              <option value="pass">ผ่านทั้ง 2 ด้าน</option>
+              <option value="fail">ไม่ผ่านอย่างน้อย 1 ด้าน</option>
+            </select>
+          </div>
+        </div>
+        <div id="records-list"></div>
+      </div>
+
+      <!-- ══ REPORT: INDIVIDUAL ══ -->
+      <div class="page" id="page-report-individual">
+        <div class="filter-bar">
+          <div class="field">
+            <label>เลือกครูผู้ช่วย</label>
+            <select id="ri-teacher" onchange="renderIndividualReport()">
+              <option value="">-- เลือกครู --</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <button class="btn btn-primary btn-sm" onclick="exportIndividualPDF()">📄 Export PDF</button>
+            <button class="btn btn-success btn-sm" onclick="exportIndividualExcel()">📊 Export Excel</button>
+          </div>
+        </div>
+        <div id="individual-report-content"></div>
+      </div>
+
+      <!-- ══ REPORT: SCHOOL ══ -->
+      <div class="page" id="page-report-school">
+        <div class="filter-bar">
+          <div class="field">
+            <label>เลือกโรงเรียน</label>
+            <select id="rs-school" onchange="renderSchoolReport()">
+              <option value="">-- เลือกโรงเรียน --</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <button class="btn btn-primary btn-sm" onclick="exportSchoolPDF()">📄 Export PDF</button>
+            <button class="btn btn-success btn-sm" onclick="exportSchoolExcel()">📊 Export Excel</button>
+          </div>
+        </div>
+        <div id="school-report-content"></div>
+      </div>
+
+      <!-- ══ REPORT: OVERVIEW ══ -->
+      <div class="page" id="page-report-overview">
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;">
+          <button class="btn btn-primary btn-sm" onclick="exportOverviewPDF()">📄 Export PDF ภาพรวม</button>
+          <button class="btn btn-success btn-sm" onclick="exportOverviewExcel()">📊 Export Excel ภาพรวม</button>
+        </div>
+        <div id="overview-content"></div>
+      </div>
+
+      <!-- ══ DATA MANAGEMENT ══ -->
+      <div class="page" id="page-data-management">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+          <!-- Schools -->
+          <div class="card">
+            <div class="card-header"><h3>🏫 โรงเรียน</h3><button class="btn btn-primary btn-xs" style="margin-left:auto;" onclick="openAddModal('school')">+ เพิ่ม</button></div>
+            <div class="card-body" style="padding:16px;"><div id="list-schools"></div></div>
+          </div>
+          <!-- Networks -->
+          <div class="card">
+            <div class="card-header"><h3>🗺️ สหวิทยาเขต</h3><button class="btn btn-primary btn-xs" style="margin-left:auto;" onclick="openAddModal('network')">+ เพิ่ม</button></div>
+            <div class="card-body" style="padding:16px;"><div id="list-networks"></div></div>
+          </div>
+          <!-- Teachers -->
+          <div class="card">
+            <div class="card-header"><h3>👩‍🏫 ครูผู้ช่วย</h3><button class="btn btn-primary btn-xs" style="margin-left:auto;" onclick="openAddModal('teacher')">+ เพิ่ม</button></div>
+            <div class="card-body" style="padding:16px;"><div id="list-teachers"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ USERS ══ -->
+      <div class="page" id="page-users">
+        <div class="card">
+          <div class="card-header"><h3>👥 จัดการผู้ใช้งานระบบ</h3><button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="openUserModal()">+ เพิ่มผู้ใช้</button></div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-wrap"><table><thead><tr><th>#</th><th>ชื่อผู้ใช้</th><th>ชื่อ-นามสกุล</th><th>บทบาท</th><th>จัดการ</th></tr></thead><tbody id="tbody-users"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── MODALS ── -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <h2 id="modal-add-title">เพิ่มข้อมูล</h2>
+    <div id="modal-add-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add')">ยกเลิก</button>
+      <button class="btn btn-primary" id="modal-add-save" onclick="saveModalData()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <h2 id="modal-user-title">เพิ่มผู้ใช้งาน</h2>
+    <div class="form-group"><label>ชื่อผู้ใช้ (Username)</label><input type="text" id="new-username" placeholder="กรอกชื่อผู้ใช้"></div>
+    <div class="form-group"><label>รหัสผ่าน (Password)</label><input type="password" id="new-password" placeholder="กรอกรหัสผ่าน"></div>
+    <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="new-fullname" placeholder="เช่น นายธีรพงศ์ จุลสายพันธ์"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-user')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveUser()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-view">
+  <div class="modal" style="width:700px;max-width:98vw;">
+    <h2>📋 รายละเอียดการประเมิน</h2>
+    <div id="modal-view-content"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-view')">ปิด</button>
+      <button class="btn btn-danger" id="modal-delete-btn">🗑️ ลบรายการนี้</button>
+      <button class="btn btn-primary" onclick="printCurrentView()">🖨️ พิมพ์</button>
+    </div>
+  </div>
+</div>
+
+<div class="autosave-indicator" id="autosave-indicator">✅ บันทึกอัตโนมัติแล้ว</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  DATA LAYER
+// ════════════════════════════════════════════════
+const DB = {
+  get: k => { try{ return JSON.parse(localStorage.getItem('w19_'+k)||'null'); } catch{return null;} },
+  set: (k,v) => localStorage.setItem('w19_'+k, JSON.stringify(v)),
+};
+
+// DEFAULT DATA
+function initData() {
+  if (!DB.get('users')) {
+    DB.set('users', [
+      { id:1, username:'admin', password:'1234', fullname:'นายธีรพงศ์ จุลสายพันธ์' },
+    ]);
+  }
+  if (!DB.get('schools')) {
+    DB.set('schools', [
+      { id:1, name:'โรงเรียนเพชรพิทยาคม', network:'สหวิทยาเขตเพชรบูรณ์ 1' },
+      { id:2, name:'โรงเรียนวิทยานุกูลนารี', network:'สหวิทยาเขตเพชรบูรณ์ 1' },
+      { id:3, name:'โรงเรียนหล่มสักวิทยาคม', network:'สหวิทยาเขตเพชรบูรณ์ 2' },
+      { id:4, name:'โรงเรียนหล่มเก่าพิทยาคม', network:'สหวิทยาเขตเพชรบูรณ์ 2' },
+      { id:5, name:'โรงเรียนศรีเทพประชาสรรค์', network:'สหวิทยาเขตเพชรบูรณ์ 3' },
+    ]);
+  }
+  if (!DB.get('networks')) {
+    DB.set('networks', ['สหวิทยาเขตเพชรบูรณ์ 1','สหวิทยาเขตเพชรบูรณ์ 2','สหวิทยาเขตเพชรบูรณ์ 3']);
+  }
+  if (!DB.get('teachers')) {
+    DB.set('teachers', [
+      { id:1, name:'นางสาวสมใจ ดีมาก', school:'โรงเรียนเพชรพิทยาคม' },
+      { id:2, name:'นายวิชัย สุขสวัสดิ์', school:'โรงเรียนวิทยานุกูลนารี' },
+    ]);
+  }
+  if (!DB.get('evaluations')) DB.set('evaluations', []);
+}
+
+// ════════════════════════════════════════════════
+//  EVALUATION ITEMS DATA
+// ════════════════════════════════════════════════
+const PROF_ITEMS = {
+  '1-1': [
+    { id:'1_1_1', text:'มีการวิเคราะห์หลักสูตร มาตรฐานการเรียนรู้ และตัวชี้วัด' },
+    { id:'1_1_2', text:'มีการวิเคราะห์วิชาหรือคำอธิบายรายวิชา' },
+    { id:'1_1_3', text:'มีหน่วยการเรียนรู้ โดยครอบคลุมเนื้อหาของหลักสูตร' },
+  ],
+  '1-2': [
+    { id:'1_2_1', text:'มีการออกแบบหน่วยการเรียนรู้ให้สอดคล้องกับรายวิชา' },
+    { id:'1_2_2', text:'มีหน่วยการเรียนรู้สอดคล้องกับผู้เรียน และปริบทของสถานศึกษา' },
+    { id:'1_2_3', text:'มีผลการวิเคราะห์ผู้เรียนเป็นรายบุคคล' },
+  ],
+  '1-3': [
+    { id:'1_3_1', text:'มีการจัดการเรียนรู้ โดยใช้รูปแบบ เทคนิค และเน้นกระบวนการ active learning' },
+    { id:'1_3_2', text:'มีการจัดการเรียนรู้ ซึ่งสอดคล้องกับมาตรฐานการเรียนรู้ตัวชี้วัด และจุดประสงค์การเรียนรู้' },
+  ],
+  '1-4': [
+    { id:'1_4_1', text:'มีความสามารถในการเลือกและการใช้สื่อ เทคโนโลยี และแหล่งเรียนรู้ ที่สอดคล้องกับกิจกรรมการเรียนรู้ ให้ผู้เรียนมีทักษะการคิด' },
+  ],
+  '1-5': [
+    { id:'1_5_1', text:'มีการวัดและประเมินผลการเรียนรู้ด้วยวิธีการที่หลากหลาย เหมาะสม และสอดคล้องกับมาตรฐานการเรียนรู้เพื่อให้ผู้เรียนพัฒนาการเรียนรู้อย่างต่อเนื่อง' },
+  ],
+  '1-6': [
+    { id:'1_6_1', text:'มีการจัดบรรยากาศที่ส่งเสริมและพัฒนาผู้เรียน ให้เกิดกระบวนการคิด ทักษะชีวิต ทักษะการทำงาน ทักษะการเรียนรู้และนวัตกรรม ทักษะด้านสารสนเทศ สื่อ และเทคโนโลยี' },
+  ],
+  '1-7': [
+    { id:'1_7_1', text:'มีการจัดการเรียนรู้แบบออนไลน์ หรือการประยุกต์ใช้สื่อดิจิทัลเพื่อส่งเสริมการเรียนรู้' },
+  ],
+  '2-1': [
+    { id:'2_1_1', text:'มีการจัดทำข้อมูลสารสนเทศของผู้เรียน และรายวิชา เพื่อใช้ในการส่งเสริมสนับสนุนการเรียนรู้และพัฒนาคุณภาพผู้เรียน' },
+  ],
+  '2-2': [
+    { id:'2_2_1', text:'มีการดำเนินการตามระบบดูแลช่วยเหลือผู้เรียน โดยใช้ข้อมูลสารสนเทศเกี่ยวกับผู้เรียนรายบุคคลและประสานความร่วมมือกับผู้มีส่วนเกี่ยวข้อง เพื่อพัฒนาและแก้ปัญหาผู้เรียน' },
+  ],
+  '2-3': [
+    { id:'2_3_1', text:'การเรียนรู้ด้านกฎหมาย ระเบียบที่เกี่ยวข้องกับการปฏิบัติงาน เช่น ความรู้ด้านงาน ๔ ฝ่าย (วิชาการ งบประมาณ บุคคล และบริหารงานทั่วไป) การจัดซื้อจัดจ้างการเงินและพัสดุ บัญชีการเงินในโรงเรียน การเขียนหนังสือราชการ ความรู้ด้านนโยบาย กฎหมายการศึกษา และที่เกี่ยวข้อง' },
+  ],
+};
+
+const CHAR_ITEMS = [
+  { id:'c_1', text:'การมีวินัยในตนเอง ยอมรับและถือปฏิบัติตามกฎ กติกา มารยาท ขนบธรรมเนียม และแบบแผนอันดีงามของสังคม' },
+  { id:'c_2', text:'การตรงต่อเวลา' },
+  { id:'c_3', text:'การอุทิศเวลาให้แก่ทางราชการและผู้เรียนอย่างต่อเนื่อง' },
+  { id:'c_4', text:'การเอาใจใส่ช่วยเหลือผู้เรียน และผู้รับบริการ เต็มความสามารถ ตามหลักวิชาชีพ อย่างสม่ำเสมอเท่าเทียมกัน' },
+  { id:'c_5', text:'การรักษาความสามัคคี มีน้ำใจเอื้อเฟื้อเผื่อแผ่ต่อเพื่อนร่วมงาน' },
+  { id:'c_6', text:'ให้การช่วยเหลือ หรือให้ความร่วมมือ แก่ส่วนรวมอย่างทุ่มเท และเสียสละจนสำเร็จเกิดประโยชน์ต่อส่วนรวม และได้รับยกย่อง' },
+  { id:'c_7', text:'มีส่วนร่วมอนุรักษ์ วัฒนธรรมไทย และสิ่งแวดล้อม อย่างน้อย ๒ กิจกรรม' },
+  { id:'c_8', text:'การดำรงชีวิตตามแนวทางหลักปรัชญาของเศรษฐกิจพอเพียง' },
+  { id:'c_9', text:'มีพฤติกรรมที่แสดงถึงการเป็นผู้ละเว้นอบายมุขและสิ่งเสพติด และมีส่วนร่วมในการรณรงค์และเสริมสร้างผู้อื่นในด้านนี้อย่างต่อเนื่อง' },
+  { id:'c_10', text:'ประพฤติตนเป็นแบบอย่างที่ดีให้กับผู้เรียน' },
+  { id:'c_11', text:'การรักษาชื่อเสียง ปกป้องศักดิ์ศรีแห่งวิชาชีพ จนได้รับการยกย่องเชิดเกียรติ อย่างน้อย ๑ รายการ' },
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let currentUser = null;
+let charts = {};
+let modalType = '';
+let editId = null;
+let viewId = null;
+let autoSaveTimer = null;
+
+// ════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════
+function doLogin() {
+  const u = document.getElementById('inp-username').value.trim();
+  const p = document.getElementById('inp-password').value.trim();
+  const users = DB.get('users') || [];
+  const found = users.find(x => x.username===u && x.password===p);
+  if (found) {
+    currentUser = found;
+    DB.set('session', found.id);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  if (!confirm('ต้องการออกจากระบบหรือไม่?')) return;
+  currentUser = null;
+  DB.set('session', null);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('inp-username').value = '';
+  document.getElementById('inp-password').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════
+//  INIT APP
+// ════════════════════════════════════════════════
+function initApp() {
+  document.getElementById('sidebar-username').textContent = currentUser.fullname || currentUser.username;
+  document.getElementById('user-avatar-text').textContent = (currentUser.fullname||currentUser.username)[0];
+  renderEvalItems();
+  populateSelects();
+  showPage('dashboard');
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+const pageTitles = {
+  'dashboard': 'แดชบอร์ดภาพรวม',
+  'new-eval': 'บันทึกการประเมินใหม่',
+  'records': 'บันทึกการประเมินทั้งหมด',
+  'report-individual': 'รายงานรายบุคคล',
+  'report-school': 'รายงานรายโรงเรียน',
+  'report-overview': 'ภาพรวม สพม.เพชรบูรณ์',
+  'data-management': 'จัดการข้อมูลพื้นฐาน',
+  'users': 'จัดการผู้ใช้งาน',
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  if (id==='dashboard') renderDashboard();
+  if (id==='records') renderRecords();
+  if (id==='report-individual') { populateReportSelects(); renderIndividualReport(); }
+  if (id==='report-school') { populateReportSelects(); renderSchoolReport(); }
+  if (id==='report-overview') renderOverviewReport();
+  if (id==='data-management') renderDataManagement();
+  if (id==='users') renderUsers();
+}
+
+// ════════════════════════════════════════════════
+//  BUILD EVAL FORM ITEMS
+// ════════════════════════════════════════════════
+// วิธีการประเมินด้านวิชาชีพ (ตามแบบฟอร์ม PDF)
+const PROF_METHODS = [
+  { id:'pm_observe', label:'การสังเกตการสอน' },
+  { id:'pm_interview', label:'การสัมภาษณ์ สนทนา' },
+  { id:'pm_doc_report', label:'เอกสาร – บันทึก/การรายงาน' },
+  { id:'pm_doc_order', label:'เอกสาร – คำสั่ง' },
+  { id:'pm_other', label:'อื่น ๆ' },
+];
+// วิธีการประเมินด้านคุณลักษณะ (ตามแบบฟอร์ม PDF)
+const CHAR_METHODS = [
+  { id:'cm_self_report', label:'การบันทึก/รายงานตนเอง' },
+  { id:'cm_cert', label:'เกียรติบัตร' },
+  { id:'cm_timelog', label:'บันทึกการลงเวลาปฏิบัติราชการ' },
+  { id:'cm_doc_report', label:'เอกสาร – บันทึก/การรายงาน' },
+  { id:'cm_doc_order', label:'เอกสาร – คำสั่ง' },
+  { id:'cm_other', label:'อื่น ๆ' },
+];
+
+function renderEvalItems() {
+  // Professional items
+  Object.entries(PROF_ITEMS).forEach(([key, items]) => {
+    const container = document.getElementById('items-'+key);
+    if (!container) return;
+    container.innerHTML = items.map((item) => `
+      <div class="eval-item">
+        <div style="flex:1;padding:10px 12px;font-size:13.5px;line-height:1.6;display:flex;align-items:flex-start;gap:8px;">
+          <span style="color:var(--primary);font-size:18px;line-height:1.2;flex-shrink:0;">○</span>
+          <span>${item.text}</span>
+        </div>
+        <div class="eval-checks">
+          <label style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;">
+            <input type="checkbox" id="chk_${item.id}" onchange="calcProfScore()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
+            <span>ปรากฏ</span>
+          </label>
+        </div>
+        <div class="eval-method" style="flex-direction:column;align-items:flex-start;gap:4px;padding:8px 10px;">
+          ${PROF_METHODS.map(m => `
+            <label style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;">
+              <input type="checkbox" id="${item.id}_${m.id}" style="width:13px;height:13px;cursor:pointer;accent-color:#0369a1;">
+              <span>${m.label}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  });
+
+  // Character items
+  const charContainer = document.getElementById('items-char');
+  if (!charContainer) return;
+  charContainer.innerHTML = CHAR_ITEMS.map(item => `
+    <div class="eval-item">
+      <div style="flex:1;padding:10px 12px;font-size:13.5px;line-height:1.6;display:flex;align-items:flex-start;gap:8px;">
+        <span style="color:#065f46;font-size:18px;line-height:1.2;flex-shrink:0;">○</span>
+        <span>${item.text}</span>
+      </div>
+      <div class="eval-checks">
+        <label style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;">
+          <input type="checkbox" id="chk_${item.id}" onchange="calcCharScore()" style="width:16px;height:16px;cursor:pointer;accent-color:#065f46;">
+          <span>ปรากฏ</span>
+        </label>
+      </div>
+      <div class="eval-method" style="flex-direction:column;align-items:flex-start;gap:4px;padding:8px 10px;">
+        ${CHAR_METHODS.map(m => `
+          <label style="cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;">
+            <input type="checkbox" id="${item.id}_${m.id}" style="width:13px;height:13px;cursor:pointer;accent-color:#065f46;">
+            <span>${m.label}</span>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function calcProfScore() {
+  const allIds = Object.values(PROF_ITEMS).flat().map(x=>x.id);
+  const checked = allIds.filter(id => document.getElementById('chk_'+id)?.checked).length;
+  document.getElementById('prof-count').textContent = checked;
+  const pct = (checked/15)*100;
+  document.getElementById('prof-bar').style.width = pct+'%';
+  const pass = checked >= 9;
+  const el = document.getElementById('prof-result');
+  el.textContent = pass ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+  el.className = 'summary-result '+(pass?'pass':'fail');
+  triggerAutoSave();
+}
+
+function calcCharScore() {
+  const checked = CHAR_ITEMS.filter(item => document.getElementById('chk_'+item.id)?.checked).length;
+  document.getElementById('char-count').textContent = checked;
+  const pct = (checked/11)*100;
+  document.getElementById('char-bar').style.width = pct+'%';
+  const pass = checked >= 7;
+  const el = document.getElementById('char-result');
+  el.textContent = pass ? '✅ ผ่าน' : '❌ ไม่ผ่าน';
+  el.className = 'summary-result '+(pass?'pass':'fail');
+  triggerAutoSave();
+}
+
+// ════════════════════════════════════════════════
+//  POPULATE SELECTS
+// ════════════════════════════════════════════════
+function populateSelects() {
+  const schools = DB.get('schools') || [];
+  const teachers = DB.get('teachers') || [];
+  const networks = DB.get('networks') || [];
+
+  // Eval form
+  const schoolSel = document.getElementById('eval-school');
+  schoolSel.innerHTML = '<option value="">-- เลือกโรงเรียน --</option>' +
+    schools.map(s => `<option value="${s.name}" data-network="${s.network}">${s.name}</option>`).join('');
+  
+  const teacherSel = document.getElementById('eval-teacher');
+  teacherSel.innerHTML = '<option value="">-- เลือกครูผู้ช่วย --</option>' +
+    teachers.map(t => `<option value="${t.name}">${t.name} (${t.school})</option>`).join('');
+
+  // Filter bars
+  ['filter-school','rs-school'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<option value="">ทั้งหมด / เลือกโรงเรียน</option>` +
+      schools.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  });
+  const fn = document.getElementById('filter-network');
+  if (fn) fn.innerHTML = '<option value="">ทั้งหมด</option>' + networks.map(n=>`<option value="${n}">${n}</option>`).join('');
+
+  const riT = document.getElementById('ri-teacher');
+  if (riT) riT.innerHTML = '<option value="">-- เลือกครู --</option>' +
+    teachers.map(t=>`<option value="${t.name}">${t.name}</option>`).join('');
+}
+
+function populateReportSelects() {
+  populateSelects();
+}
+
+function updateNetworkFromSchool() {
+  const sel = document.getElementById('eval-school');
+  const opt = sel.options[sel.selectedIndex];
+  document.getElementById('eval-network').value = opt ? (opt.dataset.network||'') : '';
+}
+
+// ════════════════════════════════════════════════
+//  SAVE EVALUATION
+// ════════════════════════════════════════════════
+function getFormData() {
+  const allProfItems = Object.values(PROF_ITEMS).flat();
+  const profChecked = allProfItems
+    .filter(item => document.getElementById('chk_'+item.id)?.checked)
+    .map(item => item.id);
+  // Save which prof methods are checked per item
+  const profMethodChecked = {};
+  allProfItems.forEach(item => {
+    profMethodChecked[item.id] = PROF_METHODS
+      .filter(m => document.getElementById(item.id+'_'+m.id)?.checked)
+      .map(m => m.id);
+  });
+  const charChecked = CHAR_ITEMS.filter(item => document.getElementById('chk_'+item.id)?.checked).map(item=>item.id);
+  const charMethodChecked = {};
+  CHAR_ITEMS.forEach(item => {
+    charMethodChecked[item.id] = CHAR_METHODS
+      .filter(m => document.getElementById(item.id+'_'+m.id)?.checked)
+      .map(m => m.id);
+  });
+
+  return {
+    date: document.getElementById('eval-date').value,
+    time: document.getElementById('eval-time').value,
+    round: document.getElementById('eval-round').value,
+    teacher: document.getElementById('eval-teacher').value,
+    school: document.getElementById('eval-school').value,
+    network: document.getElementById('eval-network').value,
+    subject: document.getElementById('eval-subject').value,
+    level: document.getElementById('eval-level').value,
+    profChecked, profMethodChecked, charChecked, charMethodChecked,
+    suggest: document.getElementById('remark-suggest').value,
+    strength: document.getElementById('remark-strength').value,
+    improve: document.getElementById('remark-improve').value,
+    photo: document.getElementById('photo-preview').src !== window.location.href ? document.getElementById('photo-preview').src : null,
+    profPass: profChecked.length >= 9,
+    charPass: charChecked.length >= 7,
+    overallPass: profChecked.length >= 9 && charChecked.length >= 7,
+    savedBy: currentUser.fullname || currentUser.username,
+    savedAt: new Date().toISOString(),
+  };
+}
+
+function saveEvaluation() {
+  const data = getFormData();
+  if (!data.date || !data.teacher || !data.school || !data.round) {
+    alert('กรุณากรอกข้อมูลให้ครบถ้วน: วันที่, ครูผู้รับการประเมิน, โรงเรียน และครั้งที่ประเมิน');
+    return;
+  }
+  const evals = DB.get('evaluations') || [];
+  if (editId) {
+    const idx = evals.findIndex(e=>e.id===editId);
+    if (idx>-1) { data.id=editId; evals[idx]=data; }
+    editId=null;
+  } else {
+    data.id = Date.now().toString();
+    evals.push(data);
+  }
+  DB.set('evaluations', evals);
+  showAutosave();
+  alert('✅ บันทึกการประเมินเรียบร้อยแล้ว!');
+  resetEvalForm();
+  showPage('records');
+}
+
+function resetEvalForm() {
+  document.getElementById('eval-date').value = '';
+  document.getElementById('eval-time').value = '';
+  document.getElementById('eval-round').value = '';
+  document.getElementById('eval-teacher').value = '';
+  document.getElementById('eval-school').value = '';
+  document.getElementById('eval-network').value = '';
+  document.getElementById('eval-subject').value = '';
+  document.getElementById('eval-level').value = '';
+  document.getElementById('remark-suggest').value = '';
+  document.getElementById('remark-strength').value = '';
+  document.getElementById('remark-improve').value = '';
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-placeholder').style.display = 'block';
+  document.getElementById('photo-drop').classList.remove('has-photo');
+  // Reset checkboxes
+  document.querySelectorAll('#page-new-eval input[type=checkbox]').forEach(c => c.checked=false);
+  calcProfScore(); calcCharScore();
+  editId = null;
+}
+
+function triggerAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    const d = getFormData();
+    DB.set('draft', d);
+    showAutosave();
+  }, 1500);
+}
+
+function showAutosave() {
+  const el = document.getElementById('autosave-indicator');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ════════════════════════════════════════════════
+//  PHOTO
+// ════════════════════════════════════════════════
+function handlePhotoChange(input) {
+  if (input.files[0]) processPhoto(input.files[0]);
+}
+function handlePhotoDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processPhoto(file);
+}
+function processPhoto(file) {
+  if (file.size > 5*1024*1024) { alert('ไฟล์ภาพใหญ่เกิน 5MB'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('photo-preview').src = e.target.result;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('photo-placeholder').style.display = 'none';
+    document.getElementById('photo-drop').classList.add('has-photo');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function renderDashboard() {
+  const evals = DB.get('evaluations') || [];
+  const teachers = DB.get('teachers') || [];
+  const schools = DB.get('schools') || [];
+  const total = evals.length;
+  const passAll = evals.filter(e=>e.overallPass).length;
+  const failAll = total - passAll;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-icon blue">📝</div><div class="stat-info"><div class="stat-num">${total}</div><div class="stat-label">บันทึกการประเมินทั้งหมด</div></div></div>
+    <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-num">${passAll}</div><div class="stat-label">ผ่านการประเมิน</div></div></div>
+    <div class="stat-card"><div class="stat-icon red">❌</div><div class="stat-info"><div class="stat-num">${failAll}</div><div class="stat-label">ไม่ผ่านการประเมิน</div></div></div>
+    <div class="stat-card"><div class="stat-icon yellow">👩‍🏫</div><div class="stat-info"><div class="stat-num">${teachers.length}</div><div class="stat-label">ครูผู้ช่วยในระบบ</div></div></div>
+  `;
+
+  // Recent table
+  const recent = [...evals].sort((a,b)=>new Date(b.savedAt)-new Date(a.savedAt)).slice(0,10);
+  document.getElementById('tbody-recent').innerHTML = recent.length ? recent.map((e,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${formatDate(e.date)}</td>
+      <td><strong>${e.teacher}</strong></td>
+      <td>${e.school}</td>
+      <td><span class="badge badge-info">ครั้งที่ ${e.round}</span></td>
+      <td><span class="badge ${e.profPass?'badge-success':'badge-danger'}">${e.profChecked.length}/15 ${e.profPass?'✅':'❌'}</span></td>
+      <td><span class="badge ${e.charPass?'badge-success':'badge-danger'}">${e.charChecked.length}/11 ${e.charPass?'✅':'❌'}</span></td>
+      <td><span class="badge ${e.overallPass?'badge-success':'badge-danger'}">${e.overallPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</span></td>
+      <td><button class="btn btn-primary btn-xs" onclick="viewEval('${e.id}')">ดูรายละเอียด</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="9" class="text-center" style="padding:24px;color:var(--text-muted);">ยังไม่มีข้อมูลการประเมิน</td></tr>';
+
+  renderCharts(evals);
+}
+
+function renderCharts(evals) {
+  // Destroy old charts
+  Object.values(charts).forEach(c => { try{c.destroy();}catch{} });
+  charts = {};
+
+  const schools = DB.get('schools') || [];
+  const networks = DB.get('networks') || [];
+
+  // Donut: pass/fail
+  const ctx1 = document.getElementById('chart-donut').getContext('2d');
+  charts.donut = new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: ['ผ่าน','ไม่ผ่าน'],
+      datasets: [{ data: [evals.filter(e=>e.overallPass).length, evals.filter(e=>!e.overallPass).length], backgroundColor:['#16a34a','#dc2626'], borderWidth:0 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{font:{family:'Sarabun',size:13}} } } }
+  });
+
+  // Bar: by round
+  const ctx2 = document.getElementById('chart-bar-round').getContext('2d');
+  const rounds = [1,2,3,4];
+  charts.barRound = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: rounds.map(r=>'ครั้งที่ '+r),
+      datasets: [
+        { label:'ผ่าน', data: rounds.map(r=>evals.filter(e=>e.round==r&&e.overallPass).length), backgroundColor:'#16a34a' },
+        { label:'ไม่ผ่าน', data: rounds.map(r=>evals.filter(e=>e.round==r&&!e.overallPass).length), backgroundColor:'#dc2626' },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, scales:{x:{stacked:false},y:{stacked:false,beginAtZero:true,ticks:{stepSize:1}}}, plugins:{legend:{labels:{font:{family:'Sarabun'}}}} }
+  });
+
+  // Bar: by school
+  const ctx3 = document.getElementById('chart-bar-school').getContext('2d');
+  const schoolNames = [...new Set(evals.map(e=>e.school))].slice(0,10);
+  charts.barSchool = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: schoolNames.map(s=>s.replace('โรงเรียน','')),
+      datasets: [
+        { label:'ผ่าน', data: schoolNames.map(s=>evals.filter(e=>e.school===s&&e.overallPass).length), backgroundColor:'#2563a8' },
+        { label:'ไม่ผ่าน', data: schoolNames.map(s=>evals.filter(e=>e.school===s&&!e.overallPass).length), backgroundColor:'#f59e0b' },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}, plugins:{legend:{labels:{font:{family:'Sarabun'}}}} }
+  });
+
+  // Bar: by network
+  const ctx4 = document.getElementById('chart-bar-network').getContext('2d');
+  const netNames = [...new Set([...networks, ...evals.map(e=>e.network).filter(Boolean)])];
+  charts.barNet = new Chart(ctx4, {
+    type: 'bar',
+    data: {
+      labels: netNames,
+      datasets: [
+        { label:'ผ่าน', data: netNames.map(n=>evals.filter(e=>e.network===n&&e.overallPass).length), backgroundColor:'#7c3aed' },
+        { label:'ไม่ผ่าน', data: netNames.map(n=>evals.filter(e=>e.network===n&&!e.overallPass).length), backgroundColor:'#db2777' },
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}, plugins:{legend:{labels:{font:{family:'Sarabun'}}}} }
+  });
+}
+
+// ════════════════════════════════════════════════
+//  RECORDS
+// ════════════════════════════════════════════════
+function renderRecords() {
+  let evals = DB.get('evaluations') || [];
+  const fname = document.getElementById('filter-name')?.value?.toLowerCase() || '';
+  const fschool = document.getElementById('filter-school')?.value || '';
+  const fnetwork = document.getElementById('filter-network')?.value || '';
+  const fround = document.getElementById('filter-round')?.value || '';
+  const fresult = document.getElementById('filter-result')?.value || '';
+
+  if (fname) evals = evals.filter(e => e.teacher.toLowerCase().includes(fname));
+  if (fschool) evals = evals.filter(e => e.school === fschool);
+  if (fnetwork) evals = evals.filter(e => e.network === fnetwork);
+  if (fround) evals = evals.filter(e => e.round == fround);
+  if (fresult === 'pass') evals = evals.filter(e => e.overallPass);
+  if (fresult === 'fail') evals = evals.filter(e => !e.overallPass);
+
+  evals = [...evals].sort((a,b) => new Date(b.savedAt)-new Date(a.savedAt));
+
+  const container = document.getElementById('records-list');
+  if (!evals.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>ไม่พบข้อมูลการประเมิน</p></div>';
+    return;
+  }
+  container.innerHTML = evals.map(e => `
+    <div class="record-card">
+      <div class="record-card-header">
+        <span style="font-size:20px">📋</span>
+        <div style="flex:1">
+          <div style="font-size:16px;font-weight:700;">${e.teacher}</div>
+          <div style="font-size:13px;color:var(--text-muted);">${e.school} | ${e.network||'-'}</div>
+        </div>
+        <span class="badge badge-info">ครั้งที่ ${e.round}</span>
+        <span class="badge ${e.overallPass?'badge-success':'badge-danger'}">${e.overallPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</span>
+        <button class="btn btn-primary btn-xs" onclick="viewEval('${e.id}')">ดูรายละเอียด</button>
+        <button class="btn btn-outline btn-xs" onclick="editEval('${e.id}')">✏️ แก้ไข</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteEval('${e.id}')">🗑️</button>
+      </div>
+      <div class="record-card-body">
+        <div class="record-field"><div class="rf-label">วันที่ประเมิน</div><div class="rf-value">${formatDate(e.date)}</div></div>
+        <div class="record-field"><div class="rf-label">ด้านวิชาชีพ</div><div class="rf-value"><span class="badge ${e.profPass?'badge-success':'badge-danger'}">${e.profChecked.length}/15</span></div></div>
+        <div class="record-field"><div class="rf-label">ด้านคุณลักษณะ</div><div class="rf-value"><span class="badge ${e.charPass?'badge-success':'badge-danger'}">${e.charChecked.length}/11</span></div></div>
+        <div class="record-field"><div class="rf-label">รายวิชา/ระดับ</div><div class="rf-value">${e.subject||'-'} ${e.level?'('+e.level+')':''}</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewEval(id) {
+  const evals = DB.get('evaluations') || [];
+  const e = evals.find(x=>x.id===id);
+  if (!e) return;
+  viewId = id;
+  
+  const allProfItems = Object.values(PROF_ITEMS).flat();
+  const profRows = allProfItems.map(item => {
+    const methods = e.profMethodChecked ? (e.profMethodChecked[item.id]||[]) : [];
+    const methodLabels = PROF_METHODS.filter(m=>methods.includes(m.id)).map(m=>m.label).join(', ');
+    return `
+    <tr>
+      <td style="font-size:12px">${item.id.replace(/_/g,'.')}</td>
+      <td style="font-size:13px">${item.text}</td>
+      <td style="text-align:center">${(e.profChecked||[]).includes(item.id)?'<span class="badge badge-success">✓</span>':'<span style="color:#ccc">-</span>'}</td>
+      <td style="font-size:11px;color:var(--text-muted)">${methodLabels||'-'}</td>
+    </tr>`;
+  }).join('');
+
+  const charRows = CHAR_ITEMS.map(item => {
+    const methods = e.charMethodChecked ? (e.charMethodChecked[item.id]||[]) : [];
+    const methodLabels = CHAR_METHODS.filter(m=>methods.includes(m.id)).map(m=>m.label).join(', ');
+    return `
+    <tr>
+      <td style="font-size:12px">${item.id.replace('c_','')}</td>
+      <td style="font-size:13px">${item.text}</td>
+      <td style="text-align:center">${(e.charChecked||[]).includes(item.id)?'<span class="badge badge-success">✓</span>':'<span style="color:#ccc">-</span>'}</td>
+      <td style="font-size:11px;color:var(--text-muted)">${methodLabels||'-'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('modal-view-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;padding:14px;background:var(--surface2);border-radius:10px;">
+      <div><span style="font-size:12px;color:var(--text-muted);">ครูผู้รับการประเมิน</span><br><strong>${e.teacher}</strong></div>
+      <div><span style="font-size:12px;color:var(--text-muted);">โรงเรียน</span><br><strong>${e.school}</strong></div>
+      <div><span style="font-size:12px;color:var(--text-muted);">วันที่ / ครั้งที่</span><br><strong>${formatDate(e.date)} / ครั้งที่ ${e.round}</strong></div>
+      <div><span style="font-size:12px;color:var(--text-muted);">ผลการประเมินโดยรวม</span><br><span class="badge ${e.overallPass?'badge-success':'badge-danger'}" style="font-size:14px">${e.overallPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</span></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <div style="flex:1;padding:10px;border-radius:8px;background:${e.profPass?'var(--success-light)':'var(--danger-light)'};">
+        <div style="font-size:12px;font-weight:700;">ด้านวิชาชีพ</div>
+        <div style="font-size:18px;font-weight:800;">${e.profChecked.length}/15 ${e.profPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</div>
+      </div>
+      <div style="flex:1;padding:10px;border-radius:8px;background:${e.charPass?'var(--success-light)':'var(--danger-light)'};">
+        <div style="font-size:12px;font-weight:700;">ด้านคุณลักษณะ</div>
+        <div style="font-size:18px;font-weight:800;">${e.charChecked.length}/11 ${e.charPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table style="font-size:13px;">
+        <thead><tr><th style="width:60px">ข้อ</th><th>รายการประเมิน (ด้านวิชาชีพ)</th><th>ปรากฏ</th><th>หลักฐาน</th></tr></thead>
+        <tbody>${profRows}</tbody>
+      </table>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table style="font-size:13px;">
+        <thead><tr><th style="width:60px">ข้อ</th><th>รายการประเมิน (ด้านคุณลักษณะ)</th><th>ปรากฏ</th><th>หลักฐาน</th></tr></thead>
+        <tbody>${charRows}</tbody>
+      </table>
+    </div>
+    ${e.suggest||e.strength||e.improve ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      ${e.suggest?`<div style="padding:10px;background:var(--primary-pale);border-radius:8px;"><div style="font-weight:700;font-size:12px;margin-bottom:4px;">📌 ข้อเสนอแนะ</div><div style="font-size:13px;">${e.suggest}</div></div>`:''}
+      ${e.strength?`<div style="padding:10px;background:var(--success-light);border-radius:8px;"><div style="font-weight:700;font-size:12px;margin-bottom:4px;">⭐ จุดเด่น</div><div style="font-size:13px;">${e.strength}</div></div>`:''}
+      ${e.improve?`<div style="padding:10px;background:#fef3c7;border-radius:8px;"><div style="font-weight:700;font-size:12px;margin-bottom:4px;">🔧 จุดที่ควรพัฒนา</div><div style="font-size:13px;">${e.improve}</div></div>`:''}
+    </div>` : ''}
+    ${e.photo ? `<div style="margin-top:12px;"><img src="${e.photo}" style="max-width:100%;max-height:200px;border-radius:8px;"></div>` : ''}
+  `;
+  document.getElementById('modal-delete-btn').onclick = () => { closeModal('modal-view'); deleteEval(id); };
+  document.getElementById('modal-view').classList.add('open');
+}
+
+function editEval(id) {
+  const evals = DB.get('evaluations') || [];
+  const e = evals.find(x=>x.id===id);
+  if (!e) return;
+  editId = id;
+  showPage('new-eval');
+  // Fill form
+  setTimeout(() => {
+    document.getElementById('eval-date').value = e.date;
+    document.getElementById('eval-time').value = e.time;
+    document.getElementById('eval-round').value = e.round;
+    document.getElementById('eval-teacher').value = e.teacher;
+    document.getElementById('eval-school').value = e.school;
+    document.getElementById('eval-network').value = e.network;
+    document.getElementById('eval-subject').value = e.subject;
+    document.getElementById('eval-level').value = e.level;
+    document.getElementById('remark-suggest').value = e.suggest;
+    document.getElementById('remark-strength').value = e.strength;
+    document.getElementById('remark-improve').value = e.improve;
+    // Prof checks
+    Object.values(PROF_ITEMS).flat().forEach(item => {
+      const chk = document.getElementById('chk_'+item.id);
+      if (chk) chk.checked = (e.profChecked||[]).includes(item.id);
+      // restore method checkboxes
+      const methods = e.profMethodChecked ? (e.profMethodChecked[item.id]||[]) : [];
+      PROF_METHODS.forEach(m => {
+        const el = document.getElementById(item.id+'_'+m.id);
+        if (el) el.checked = methods.includes(m.id);
+      });
+    });
+    CHAR_ITEMS.forEach(item => {
+      const chk = document.getElementById('chk_'+item.id);
+      if (chk) chk.checked = (e.charChecked||[]).includes(item.id);
+      const methods = e.charMethodChecked ? (e.charMethodChecked[item.id]||[]) : [];
+      CHAR_METHODS.forEach(m => {
+        const el = document.getElementById(item.id+'_'+m.id);
+        if (el) el.checked = methods.includes(m.id);
+      });
+    });
+    if (e.photo) {
+      document.getElementById('photo-preview').src = e.photo;
+      document.getElementById('photo-preview').style.display = 'block';
+      document.getElementById('photo-placeholder').style.display = 'none';
+    }
+    calcProfScore(); calcCharScore();
+  }, 100);
+}
+
+function deleteEval(id) {
+  if (!confirm('ต้องการลบรายการประเมินนี้หรือไม่?')) return;
+  let evals = DB.get('evaluations') || [];
+  evals = evals.filter(e=>e.id!==id);
+  DB.set('evaluations', evals);
+  renderRecords();
+  showAutosave();
+}
+
+function printCurrentView() { window.print(); }
+
+// ════════════════════════════════════════════════
+//  REPORTS
+// ════════════════════════════════════════════════
+function renderIndividualReport() {
+  const teacher = document.getElementById('ri-teacher').value;
+  const evals = (DB.get('evaluations')||[]).filter(e=>e.teacher===teacher);
+  const container = document.getElementById('individual-report-content');
+  if (!teacher) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>กรุณาเลือกครูผู้ช่วย</p></div>'; return; }
+  if (!evals.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>ยังไม่มีข้อมูลการประเมินสำหรับครูท่านนี้</p></div>'; return; }
+  
+  container.innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-header" style="background:var(--primary);"><h3 style="color:white;">👤 รายงานรายบุคคล: ${teacher}</h3></div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ครั้งที่</th><th>วันที่</th><th>โรงเรียน</th><th>ด้านวิชาชีพ</th><th>ด้านคุณลักษณะ</th><th>ผลสรุป</th></tr></thead>
+            <tbody>
+              ${evals.map(e=>`<tr>
+                <td>ครั้งที่ ${e.round}</td>
+                <td>${formatDate(e.date)}</td>
+                <td>${e.school}</td>
+                <td><span class="badge ${e.profPass?'badge-success':'badge-danger'}">${e.profChecked.length}/15 ${e.profPass?'ผ่าน':'ไม่ผ่าน'}</span></td>
+                <td><span class="badge ${e.charPass?'badge-success':'badge-danger'}">${e.charChecked.length}/11 ${e.charPass?'ผ่าน':'ไม่ผ่าน'}</span></td>
+                <td><span class="badge ${e.overallPass?'badge-success':'badge-danger'}">${e.overallPass?'✅ ผ่าน':'❌ ไม่ผ่าน'}</span></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      ${evals.map(e=>`
+        <div class="card">
+          <div class="card-header" style="background:${e.overallPass?'var(--success)':'var(--danger)'};"><h3 style="color:white;font-size:14px;">ครั้งที่ ${e.round}</h3></div>
+          <div class="card-body" style="padding:14px;">
+            <div style="font-size:13px;color:var(--text-muted);">${formatDate(e.date)}</div>
+            <div style="margin:8px 0;"><div style="font-size:12px;">วิชาชีพ: ${e.profChecked.length}/15</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${(e.profChecked.length/15)*100}%;background:${e.profPass?'var(--success)':'var(--danger)'}"></div></div></div>
+            <div><div style="font-size:12px;">คุณลักษณะ: ${e.charChecked.length}/11</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${(e.charChecked.length/11)*100}%;background:${e.charPass?'var(--success)':'var(--danger)'}"></div></div></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderSchoolReport() {
+  const school = document.getElementById('rs-school').value;
+  const evals = (DB.get('evaluations')||[]).filter(e=>!school||e.school===school);
+  const container = document.getElementById('school-report-content');
+  if (!school) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏫</div><p>กรุณาเลือกโรงเรียน</p></div>'; return; }
+  if (!evals.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>ยังไม่มีข้อมูลการประเมินสำหรับโรงเรียนนี้</p></div>'; return; }
+
+  const teachers = [...new Set(evals.map(e=>e.teacher))];
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-header" style="background:var(--primary);"><h3 style="color:white;">🏫 รายงานรายโรงเรียน: ${school}</h3></div>
+      <div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>ครูผู้ช่วย</th><th>ครั้งที่ 1</th><th>ครั้งที่ 2</th><th>ครั้งที่ 3</th><th>ครั้งที่ 4</th><th>ผ่านทั้งหมด</th></tr></thead>
+            <tbody>
+              ${teachers.map((t,i)=>{
+                const te = evals.filter(e=>e.teacher===t);
+                const rounds = [1,2,3,4].map(r=>te.find(e=>e.round==r));
+                const allPass = rounds.every(r=>r&&r.overallPass);
+                return `<tr>
+                  <td>${i+1}</td>
+                  <td><strong>${t}</strong></td>
+                  ${rounds.map(r=>r?`<td><span class="badge ${r.overallPass?'badge-success':'badge-danger'}">${r.overallPass?'✅':'❌'}</span></td>`:'<td style="color:var(--text-light)">-</td>').join('')}
+                  <td><span class="badge ${allPass?'badge-success':'badge-warning'}">${allPass?'ผ่าน':'รอประเมิน'}</span></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderOverviewReport() {
+  const evals = DB.get('evaluations') || [];
+  const schools = DB.get('schools') || [];
+  const networks = DB.get('networks') || [];
+  
+  const container = document.getElementById('overview-content');
+  
+  // By network summary
+  const netRows = networks.map(net => {
+    const ne = evals.filter(e=>e.network===net);
+    const pass = ne.filter(e=>e.overallPass).length;
+    return `<tr>
+      <td><strong>${net}</strong></td>
+      <td>${ne.length}</td>
+      <td>${pass}</td>
+      <td>${ne.length-pass}</td>
+      <td>${ne.length?Math.round(pass/ne.length*100):0}%</td>
+    </tr>`;
+  }).join('');
+
+  const schoolRows = [...new Set(evals.map(e=>e.school))].map(school => {
+    const se = evals.filter(e=>e.school===school);
+    const pass = se.filter(e=>e.overallPass).length;
+    const net = schools.find(s=>s.name===school)?.network||'-';
+    return `<tr>
+      <td><strong>${school}</strong></td>
+      <td>${net}</td>
+      <td>${se.length}</td>
+      <td>${pass}</td>
+      <td>${se.length-pass}</td>
+      <td><span class="badge ${pass/se.length>=0.8?'badge-success':pass/se.length>=0.5?'badge-warning':'badge-danger'}">${Math.round(pass/se.length*100)||0}%</span></td>
+    </tr>`;
+  }).join('');
+
+  const roundRows = [1,2,3,4].map(r=>{
+    const re = evals.filter(e=>e.round==r);
+    const pass = re.filter(e=>e.overallPass).length;
+    return `<tr>
+      <td>ครั้งที่ ${r}</td>
+      <td>${re.length}</td>
+      <td>${pass}</td>
+      <td>${re.length-pass}</td>
+      <td>${re.length?Math.round(pass/re.length*100):0}%</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-icon blue">📊</div><div class="stat-info"><div class="stat-num">${evals.length}</div><div class="stat-label">รายการประเมินทั้งหมด</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-num">${evals.filter(e=>e.overallPass).length}</div><div class="stat-label">ผ่านการประเมิน</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">❌</div><div class="stat-info"><div class="stat-num">${evals.filter(e=>!e.overallPass).length}</div><div class="stat-label">ไม่ผ่านการประเมิน</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">📈</div><div class="stat-info"><div class="stat-num">${evals.length?Math.round(evals.filter(e=>e.overallPass).length/evals.length*100):0}%</div><div class="stat-label">อัตราการผ่าน</div></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card">
+        <div class="card-header"><h3>📋 สรุปผลแยกตามสหวิทยาเขต</h3></div>
+        <div class="card-body" style="padding:0;"><div class="table-wrap"><table><thead><tr><th>สหวิทยาเขต</th><th>ทั้งหมด</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>% ผ่าน</th></tr></thead><tbody>${netRows||'<tr><td colspan="5" class="text-center" style="padding:20px;">ไม่มีข้อมูล</td></tr>'}</tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>📋 สรุปผลแยกตามครั้งที่ประเมิน</h3></div>
+        <div class="card-body" style="padding:0;"><div class="table-wrap"><table><thead><tr><th>ครั้งที่</th><th>ทั้งหมด</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>% ผ่าน</th></tr></thead><tbody>${roundRows}</tbody></table></div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px;">
+      <div class="card-header"><h3>🏫 สรุปผลแยกตามโรงเรียน</h3></div>
+      <div class="card-body" style="padding:0;"><div class="table-wrap"><table><thead><tr><th>โรงเรียน</th><th>สหวิทยาเขต</th><th>ทั้งหมด</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>% ผ่าน</th></tr></thead><tbody>${schoolRows||'<tr><td colspan="6" class="text-center" style="padding:20px;">ไม่มีข้อมูล</td></tr>'}</tbody></table></div></div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════
+//  DATA MANAGEMENT
+// ════════════════════════════════════════════════
+function renderDataManagement() {
+  const schools = DB.get('schools') || [];
+  const networks = DB.get('networks') || [];
+  const teachers = DB.get('teachers') || [];
+
+  document.getElementById('list-schools').innerHTML = schools.map(s=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;margin-bottom:6px;background:var(--surface2);">
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${s.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);">${s.network}</div>
+      </div>
+      <button class="btn btn-danger btn-xs" onclick="deleteItem('school','${s.id}')">🗑️</button>
+    </div>
+  `).join('') || '<p style="color:var(--text-muted);font-size:13px;">ยังไม่มีข้อมูล</p>';
+
+  document.getElementById('list-networks').innerHTML = networks.map((n,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;margin-bottom:6px;background:var(--surface2);">
+      <span style="flex:1;font-size:14px;font-weight:600;">${n}</span>
+      <button class="btn btn-danger btn-xs" onclick="deleteItem('network',${i})">🗑️</button>
+    </div>
+  `).join('') || '<p style="color:var(--text-muted);font-size:13px;">ยังไม่มีข้อมูล</p>';
+
+  document.getElementById('list-teachers').innerHTML = teachers.map(t=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;margin-bottom:6px;background:var(--surface2);">
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${t.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);">${t.school}</div>
+      </div>
+      <button class="btn btn-danger btn-xs" onclick="deleteItem('teacher','${t.id}')">🗑️</button>
+    </div>
+  `).join('') || '<p style="color:var(--text-muted);font-size:13px;">ยังไม่มีข้อมูล</p>';
+}
+
+function openAddModal(type) {
+  modalType = type;
+  const titles = { school:'เพิ่มโรงเรียน', network:'เพิ่มสหวิทยาเขต', teacher:'เพิ่มครูผู้ช่วย' };
+  document.getElementById('modal-add-title').textContent = '➕ ' + titles[type];
+
+  const networks = DB.get('networks') || [];
+  const schools = DB.get('schools') || [];
+
+  let body = '';
+  if (type === 'school') {
+    body = `
+      <div class="form-group"><label>ชื่อโรงเรียน</label><input type="text" id="add-school-name" placeholder="เช่น โรงเรียนเพชรพิทยาคม"></div>
+      <div class="form-group"><label>สหวิทยาเขต</label>
+        <select id="add-school-net"><option value="">-- เลือก --</option>${networks.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>
+      </div>`;
+  } else if (type === 'network') {
+    body = `<div class="form-group"><label>ชื่อสหวิทยาเขต</label><input type="text" id="add-network-name" placeholder="เช่น สหวิทยาเขตเพชรบูรณ์ 4"></div>`;
+  } else if (type === 'teacher') {
+    body = `
+      <div class="form-group"><label>ชื่อ-นามสกุล ครูผู้ช่วย</label><input type="text" id="add-teacher-name" placeholder="เช่น นายสมชาย ใจดี"></div>
+      <div class="form-group"><label>โรงเรียนสังกัด</label>
+        <select id="add-teacher-school"><option value="">-- เลือกโรงเรียน --</option>${schools.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}</select>
+      </div>`;
+  }
+  document.getElementById('modal-add-body').innerHTML = body;
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function saveModalData() {
+  if (modalType === 'school') {
+    const name = document.getElementById('add-school-name').value.trim();
+    const net = document.getElementById('add-school-net').value;
+    if (!name) { alert('กรุณากรอกชื่อโรงเรียน'); return; }
+    const schools = DB.get('schools') || [];
+    schools.push({ id: Date.now(), name, network: net });
+    DB.set('schools', schools);
+  } else if (modalType === 'network') {
+    const name = document.getElementById('add-network-name').value.trim();
+    if (!name) { alert('กรุณากรอกชื่อสหวิทยาเขต'); return; }
+    const nets = DB.get('networks') || [];
+    nets.push(name);
+    DB.set('networks', nets);
+  } else if (modalType === 'teacher') {
+    const name = document.getElementById('add-teacher-name').value.trim();
+    const school = document.getElementById('add-teacher-school').value;
+    if (!name) { alert('กรุณากรอกชื่อครู'); return; }
+    const teachers = DB.get('teachers') || [];
+    teachers.push({ id: Date.now(), name, school });
+    DB.set('teachers', teachers);
+  }
+  closeModal('modal-add');
+  renderDataManagement();
+  populateSelects();
+  showAutosave();
+}
+
+function deleteItem(type, id) {
+  if (!confirm('ต้องการลบรายการนี้หรือไม่?')) return;
+  if (type === 'school') {
+    let s = DB.get('schools') || [];
+    s = s.filter(x => x.id != id);
+    DB.set('schools', s);
+  } else if (type === 'network') {
+    let n = DB.get('networks') || [];
+    n.splice(id, 1);
+    DB.set('networks', n);
+  } else if (type === 'teacher') {
+    let t = DB.get('teachers') || [];
+    t = t.filter(x => x.id != id);
+    DB.set('teachers', t);
+  }
+  renderDataManagement();
+  populateSelects();
+}
+
+// ════════════════════════════════════════════════
+//  USERS
+// ════════════════════════════════════════════════
+function renderUsers() {
+  const users = DB.get('users') || [];
+  document.getElementById('tbody-users').innerHTML = users.map((u,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${u.username}</strong></td>
+      <td>${u.fullname||'-'}</td>
+      <td><span class="badge badge-info">ศึกษานิเทศก์</span></td>
+      <td>
+        <button class="btn btn-danger btn-xs" onclick="deleteUser(${u.id})" ${u.id===1?'disabled':''}>🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openUserModal() {
+  document.getElementById('new-username').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('new-fullname').value = '';
+  document.getElementById('modal-user').classList.add('open');
+}
+
+function saveUser() {
+  const u = document.getElementById('new-username').value.trim();
+  const p = document.getElementById('new-password').value.trim();
+  const f = document.getElementById('new-fullname').value.trim();
+  if (!u || !p) { alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
+  const users = DB.get('users') || [];
+  if (users.find(x=>x.username===u)) { alert('ชื่อผู้ใช้นี้มีอยู่แล้ว'); return; }
+  users.push({ id: Date.now(), username:u, password:p, fullname:f });
+  DB.set('users', users);
+  closeModal('modal-user');
+  renderUsers();
+  showAutosave();
+}
+
+function deleteUser(id) {
+  if (id===1) { alert('ไม่สามารถลบผู้ดูแลระบบได้'); return; }
+  if (!confirm('ต้องการลบผู้ใช้งานนี้หรือไม่?')) return;
+  let users = DB.get('users') || [];
+  users = users.filter(u=>u.id!==id);
+  DB.set('users', users);
+  renderUsers();
+}
+
+// ════════════════════════════════════════════════
+//  MODAL HELPERS
+// ════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close on outside click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ════════════════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════════════════
+function exportOverviewExcel() {
+  const evals = DB.get('evaluations') || [];
+  if (!evals.length) { alert('ไม่มีข้อมูล'); return; }
+  
+  const wsData = [
+    ['ระบบการประเมินครูผู้ช่วย ว19 สพม.เพชรบูรณ์'],
+    [''],
+    ['#','ครูผู้ช่วย','โรงเรียน','สหวิทยาเขต','ครั้งที่','วันที่','รายวิชา','ระดับชั้น',
+     'วิชาชีพ (จาก 15)','วิชาชีพ ผ่าน/ไม่ผ่าน',
+     'คุณลักษณะ (จาก 11)','คุณลักษณะ ผ่าน/ไม่ผ่าน','ผลสรุป'],
+    ...evals.map((e,i) => [
+      i+1, e.teacher, e.school, e.network||'-', 'ครั้งที่ '+e.round, e.date,
+      e.subject||'-', e.level||'-',
+      e.profChecked.length, e.profPass?'ผ่าน':'ไม่ผ่าน',
+      e.charChecked.length, e.charPass?'ผ่าน':'ไม่ผ่าน',
+      e.overallPass?'ผ่าน':'ไม่ผ่าน'
+    ])
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:5},{wch:25},{wch:30},{wch:20},{wch:10},{wch:12},{wch:15},{wch:15},{wch:15},{wch:15},{wch:15},{wch:15},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws, 'ภาพรวม');
+  XLSX.writeFile(wb, 'ผลการประเมิน_ว19_สพม_เพชรบูรณ์.xlsx');
+}
+
+function exportOverviewPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const evals = DB.get('evaluations') || [];
+  
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('ระบบการประเมินครูผู้ช่วย ว19', 105, 20, {align:'center'});
+  doc.setFontSize(11);
+  doc.text('สพม.เพชรบูรณ์ - ภาพรวมผลการประเมิน', 105, 28, {align:'center'});
+  
+  let y = 40;
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text(`จำนวนการประเมินทั้งหมด: ${evals.length} รายการ`, 20, y); y+=7;
+  doc.text(`ผ่าน: ${evals.filter(e=>e.overallPass).length}  |  ไม่ผ่าน: ${evals.filter(e=>!e.overallPass).length}`, 20, y); y+=7;
+  doc.text(`อัตราการผ่าน: ${evals.length?Math.round(evals.filter(e=>e.overallPass).length/evals.length*100):0}%`, 20, y); y+=10;
+
+  doc.setFont('helvetica','bold');
+  doc.text('#  ครูผู้ช่วย              โรงเรียน                ครั้ง  วิชาชีพ  คุณลักษณะ  สรุป', 20, y); y+=6;
+  doc.line(20,y,190,y); y+=4;
+  doc.setFont('helvetica','normal');
+  evals.slice(0,30).forEach((e,i) => {
+    const line = `${i+1}. ${e.teacher.substring(0,18).padEnd(18)} ${e.school.replace('โรงเรียน','').substring(0,18).padEnd(18)} ${e.round}  ${e.profChecked.length}/15${e.profPass?' ผ่าน':' ไม่ผ่าน'}  ${e.charChecked.length}/11${e.charPass?' ผ่าน':' ไม่ผ่าน'}  ${e.overallPass?'ผ่าน':'ไม่ผ่าน'}`;
+    doc.text(line.substring(0,100), 20, y);
+    y += 6;
+    if (y > 270) { doc.addPage(); y = 20; }
+  });
+  
+  doc.save('ผลการประเมิน_ว19_ภาพรวม.pdf');
+}
+
+function exportIndividualExcel() {
+  const teacher = document.getElementById('ri-teacher').value;
+  if (!teacher) { alert('กรุณาเลือกครูก่อน'); return; }
+  const evals = (DB.get('evaluations')||[]).filter(e=>e.teacher===teacher);
+  if (!evals.length) { alert('ไม่มีข้อมูล'); return; }
+
+  const allProfItems = Object.values(PROF_ITEMS).flat();
+  const wsData = [
+    ['รายงานผลการประเมินรายบุคคล: '+teacher],
+    [''],
+    ['ครั้งที่','วันที่','โรงเรียน','รายวิชา','ระดับชั้น',
+     ...allProfItems.map(x=>x.id.replace(/_/g,'.')),
+     'รวมวิชาชีพ','วิชาชีพ',
+     ...CHAR_ITEMS.map(x=>x.id.replace('c_','ค.ล.')),
+     'รวมคุณลักษณะ','คุณลักษณะ','ผลสรุป'],
+    ...evals.map(e=>[
+      'ครั้งที่ '+e.round, e.date, e.school, e.subject||'-', e.level||'-',
+      ...allProfItems.map(x=>e.profChecked.includes(x.id)?1:0),
+      e.profChecked.length, e.profPass?'ผ่าน':'ไม่ผ่าน',
+      ...CHAR_ITEMS.map(x=>e.charChecked.includes(x.id)?1:0),
+      e.charChecked.length, e.charPass?'ผ่าน':'ไม่ผ่าน',
+      e.overallPass?'ผ่าน':'ไม่ผ่าน'
+    ])
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, teacher.substring(0,20));
+  XLSX.writeFile(wb, `ประเมิน_${teacher}.xlsx`);
+}
+
+function exportIndividualPDF() {
+  const teacher = document.getElementById('ri-teacher').value;
+  if (!teacher) { alert('กรุณาเลือกครูก่อน'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const evals = (DB.get('evaluations')||[]).filter(e=>e.teacher===teacher);
+  
+  doc.setFontSize(14);
+  doc.setFont('helvetica','bold');
+  doc.text('รายงานผลการประเมินรายบุคคล', 105, 20, {align:'center'});
+  doc.setFontSize(11);
+  doc.text(teacher, 105, 28, {align:'center'});
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  
+  let y = 40;
+  evals.forEach(e => {
+    doc.setFont('helvetica','bold');
+    doc.text(`ครั้งที่ ${e.round} - ${e.date} - ${e.school}`, 20, y); y+=7;
+    doc.setFont('helvetica','normal');
+    doc.text(`ด้านวิชาชีพ: ${e.profChecked.length}/15 (${e.profPass?'ผ่าน':'ไม่ผ่าน'})   ด้านคุณลักษณะ: ${e.charChecked.length}/11 (${e.charPass?'ผ่าน':'ไม่ผ่าน'})   ผลสรุป: ${e.overallPass?'ผ่าน':'ไม่ผ่าน'}`, 20, y); y+=12;
+    if (y>260) { doc.addPage(); y=20; }
+  });
+  doc.save(`รายงาน_${teacher}.pdf`);
+}
+
+function exportSchoolPDF() {
+  const school = document.getElementById('rs-school').value;
+  if (!school) { alert('กรุณาเลือกโรงเรียนก่อน'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const evals = (DB.get('evaluations')||[]).filter(e=>e.school===school);
+  
+  doc.setFontSize(13);
+  doc.setFont('helvetica','bold');
+  doc.text('รายงานผลการประเมินรายโรงเรียน', 105, 20, {align:'center'});
+  doc.setFontSize(11);
+  doc.text(school, 105, 28, {align:'center'});
+  
+  let y = 40;
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  const teachers = [...new Set(evals.map(e=>e.teacher))];
+  teachers.forEach(t => {
+    const te = evals.filter(e=>e.teacher===t);
+    doc.setFont('helvetica','bold');
+    doc.text(t, 20, y); y+=7;
+    doc.setFont('helvetica','normal');
+    te.forEach(e => {
+      doc.text(`  ครั้งที่ ${e.round}: วิชาชีพ ${e.profChecked.length}/15 (${e.profPass?'ผ่าน':'ไม่ผ่าน'})  คุณลักษณะ ${e.charChecked.length}/11 (${e.charPass?'ผ่าน':'ไม่ผ่าน'})  สรุป: ${e.overallPass?'ผ่าน':'ไม่ผ่าน'}`, 20, y);
+      y += 6;
+    });
+    y += 4;
+    if (y > 260) { doc.addPage(); y=20; }
+  });
+  doc.save(`รายงาน_${school}.pdf`);
+}
+
+function exportSchoolExcel() {
+  const school = document.getElementById('rs-school').value;
+  if (!school) { alert('กรุณาเลือกโรงเรียนก่อน'); return; }
+  const evals = (DB.get('evaluations')||[]).filter(e=>e.school===school);
+  if (!evals.length) { alert('ไม่มีข้อมูล'); return; }
+  
+  const wsData = [
+    ['รายงานผลการประเมิน: '+school],
+    [''],
+    ['ครูผู้ช่วย','ครั้งที่','วันที่','วิชาชีพ','คุณลักษณะ','ผลสรุป'],
+    ...evals.map(e=>[e.teacher,'ครั้งที่ '+e.round,e.date,`${e.profChecked.length}/15 ${e.profPass?'ผ่าน':'ไม่ผ่าน'}`,`${e.charChecked.length}/11 ${e.charPass?'ผ่าน':'ไม่ผ่าน'}`,e.overallPass?'ผ่าน':'ไม่ผ่าน'])
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  XLSX.utils.book_append_sheet(wb, ws, 'โรงเรียน');
+  XLSX.writeFile(wb, `รายงาน_${school}.xlsx`);
+}
+
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+function formatDate(d) {
+  if (!d) return '-';
+  try {
+    const [y,m,day] = d.split('-');
+    const months = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${parseInt(day)} ${months[parseInt(m)]} ${parseInt(y)+543}`;
+  } catch { return d; }
+}
+
+// ════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════
+initData();
+
+// Auto login from session
+const sid = DB.get('session');
+if (sid) {
+  const users = DB.get('users') || [];
+  const u = users.find(x=>x.id===sid);
+  if (u) {
+    currentUser = u;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  }
+}
+
+// Set today's date and time as default
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const y = now.getFullYear(); const m = String(now.getMonth()+1).padStart(2,'0'); const d = String(now.getDate()).padStart(2,'0');
+  const h = String(now.getHours()).padStart(2,'0'); const min = String(now.getMinutes()).padStart(2,'0');
+  const dateEl = document.getElementById('eval-date');
+  const timeEl = document.getElementById('eval-time');
+  if (dateEl) dateEl.value = `${y}-${m}-${d}`;
+  if (timeEl) timeEl.value = `${h}:${min}`;
+});
+</script>
+</body>
+</html>
